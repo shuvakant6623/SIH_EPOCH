@@ -1,0 +1,6 @@
+backend/__pycache__/
+backend/api/collectors/.env
+backend/api/models/__pycache__/
+backend/api/services/__pycache__/
+.vscode/
+.history/

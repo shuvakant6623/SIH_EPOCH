@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPOCH - Emergency Power Outage Control Hub</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* EPOCH Emergency Theme Colors */
+            --primary-color: #dc2626;        /* Emergency Red */
+            --secondary-color: #0f172a;      /* Deep Black */
+            --accent-color: #ea580c;         /* Alert Orange */
+            --success-color: #10b981;        /* Green */
+            --warning-color: #f59e0b;        /* Amber */
+            --error-color: #ef4444;          /* Red */
+            
+            /* Background Colors */
+            --bg-primary: #000000;           /* Pure Black */
+            --bg-secondary: #0f172a;         /* Dark Slate */
+            --bg-tertiary: #1e293b;          /* Lighter Slate */
+            --text-primary: #f8fafc;         /* Light Gray */
+            --text-secondary: #cbd5e1;       /* Medium Gray */
+            --text-muted: #94a3b8;           /* Muted Gray */
+            
+            --border-color: #334155;         /* Border Gray */
+            --hover-bg: #dc2626;             /* Emergency Red Hover */
+            
+            /* Emergency Gradients */
+            --gradient-primary: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            --gradient-accent: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+            --gradient-hero: linear-gradient(135deg, #000000 0%, #dc2626 70%, #ea580c 100%);
+            --gradient-emergency: linear-gradient(180deg, #dc2626 0%, #dc2626 70%, #ea580c 100%);
+            --gradient-dark: linear-gradient(180deg, #0f172a 0%, #dc2626 50%, #ea580c 100%);
+            
+            /* Enhanced Shadows */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.6);
+            --shadow-emergency: 0 25px 50px -12px rgba(220, 38, 38, 0.6);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(220, 38, 38, 0.3);
+            padding: 0 24px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .header.scrolled {
+            background: rgba(0, 0, 0, 0.98);
+            box-shadow: var(--shadow-emergency);
+            border-bottom: 1px solid rgba(234, 88, 12, 0.4);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            box-shadow: 0 0 20px rgba(220, 38, 38, 0.5);
+        }
+
+        .brand-title {
+            font-size: 24px;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 32px;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--text-primary);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-primary);
+            transition: width 0.2s ease;
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid rgba(220, 38, 38, 0.5);
+        }
+
+        .btn-outline:hover {
+            background: rgba(220, 38, 38, 0.2);
+            color: var(--text-primary);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 20px rgba(220, 38, 38, 0.3);
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-emergency);
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .mobile-overlay {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 120px 0 80px;
+            background: var(--gradient-hero);
+            position: relative;
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath d='M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96V200H1392C1344,200,1248,200,1152,200C1056,200,960,200,864,200C768,200,672,200,576,200C480,200,384,200,288,200C192,200,96,200,48,200L0,200Z' fill='%23ea580c' fill-opacity='0.3'/%3E%3C/svg%3E") repeat-x bottom;
+            animation: wave 20s ease-in-out infinite;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 70%;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, transparent 0%, rgba(234, 88, 12, 0.3) 50%, rgba(234, 88, 12, 0.6) 100%);
+            pointer-events: none;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: translateX(0) scaleX(1); }
+            50% { transform: translateX(-25px) scaleX(1.1); }
+        }
+
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .floating-element {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 15s ease-in-out infinite;
+            color: rgba(234, 88, 12, 0.6);
+        }
+
+        .floating-element:nth-child(1) {
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+            font-size: 60px;
+        }
+
+        .floating-element:nth-child(2) {
+            top: 60%;
+            right: 15%;
+            animation-delay: 5s;
+            font-size: 80px;
+        }
+
+        .floating-element:nth-child(3) {
+            top: 30%;
+            right: 30%;
+            animation-delay: 10s;
+            font-size: 40px;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(5deg); }
+            66% { transform: translateY(10px) rotate(-5deg); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-content {
+            text-align: center;
+            color: white;
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 24px;
+            line-height: 1.2;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+            margin-bottom: 40px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 60px;
+        }
+
+        .btn-large {
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+        }
+
+        .btn-white {
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--primary-color);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-white:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            flex-wrap: wrap;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-stat-label {
+            font-size: 14px;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 100px 0;
+            background: var(--gradient-emergency);
+            position: relative;
+        }
+
+        .features::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(220, 38, 38, 0.1) 70%, rgba(234, 88, 12, 0.2) 100%);
+            pointer-events: none;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-bottom: 60px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .feature-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            border-radius: 20px;
+            padding: 40px 32px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-emergency);
+            border-color: var(--accent-color);
+            background: rgba(15, 23, 42, 0.95);
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 32px;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 30px rgba(220, 38, 38, 0.4);
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 10px 40px rgba(234, 88, 12, 0.6);
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .feature-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 80px 0;
+            background: var(--gradient-dark);
+            position: relative;
+        }
+
+        .stats::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, rgba(234, 88, 12, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%);
+            pointer-events: none;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(234, 88, 12, 0.3);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-emergency);
+            border-color: var(--primary-color);
+        }
+
+        .stat-card:hover::before {
+            opacity: 0.1;
+        }
+
+        .stat-card > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-description {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        /* About Section */
+        .about {
+            padding: 100px 0;
+            background: var(--gradient-dark);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(220, 38, 38, 0.1) 50%, rgba(234, 88, 12, 0.2) 100%);
+            pointer-events: none;
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-bottom: 80px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .about-card {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            border-radius: 24px;
+            padding: 40px 32px;
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .about-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .about-card:hover {
+            transform: translateY(-15px);
+            box-shadow: var(--shadow-emergency);
+            border-color: var(--accent-color);
+            background: rgba(15, 23, 42, 0.95);
+        }
+
+        .about-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .about-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 32px;
+            color: white;
+            transition: all 0.4s ease;
+            box-shadow: 0 0 30px rgba(220, 38, 38, 0.4);
+        }
+
+        .about-card:hover .about-icon {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 10px 40px rgba(234, 88, 12, 0.6);
+        }
+
+        .about-card h4 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .about-card p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-size: 1rem;
+        }
+
+        /* Contact Section */
+        .contact {
+            padding: 100px 0;
+            background: var(--bg-secondary);
+            position: relative;
+        }
+
+        .contact::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .contact-content {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .contact h3 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .contact p {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 24px;
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 12px;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .contact-item:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(234, 88, 12, 0.3);
+        }
+
+        .contact-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-primary);
+            border-top: 1px solid rgba(234, 88, 12, 0.3);
+            padding: 60px 0 30px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-brand h4 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .footer-brand p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 16px;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .social-link:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(220, 38, 38, 0.5);
+        }
+
+        .footer-section h5 {
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-color);
+        }
+
+        .footer-bottom {
+            padding-top: 30px;
+            border-top: 1px solid rgba(220, 38, 38, 0.3);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        .stagger-4 { animation-delay: 0.4s; }
+        .stagger-5 { animation-delay: 0.5s; }
+        .stagger-6 { animation-delay: 0.6s; }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header {
+                padding: 0 16px;
+                height: 60px;
+            }
+
+            .nav {
+                position: fixed;
+                top: 60px;
+                left: -100%;
+                width: 280px;
+                height: calc(100vh - 60px);
+                background: rgba(0, 0, 0, 0.98);
+                backdrop-filter: blur(20px);
+                border-right: 1px solid rgba(220, 38, 38, 0.3);
+                padding: 24px;
+                transition: left 0.3s ease;
+                z-index: 999;
+            }
+
+            .nav.open {
+                left: 0;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                gap: 24px;
+                margin-bottom: 32px;
+            }
+
+            .auth-buttons {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .auth-buttons .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero {
+                padding: 100px 0 60px;
+            }
+
+            .hero-stats {
+                gap: 30px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .about-content {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-info {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 0 12px;
+                height: 56px;
+            }
+
+            .logo {
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
+            }
+
+            .brand-title {
+                font-size: 18px;
+            }
+
+            .nav {
+                top: 56px;
+                height: calc(100vh - 56px);
+                width: 260px;
+            }
+
+            .mobile-overlay {
+                top: 56px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="logo-section">
+            <div class="logo">
+                <i class="fas fa-bolt"></i>
+            </div>
+            <h1 class="brand-title">EPOCH</h1>
+        </div>
+        
+        <nav class="nav" id="nav">
+            <ul class="nav-links">
+                <li><a href="#home" class="nav-link active">Home</a></li>
+                <li><a href="#features" class="nav-link">Features</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+            </ul>
+            
+            <div class="auth-buttons">
+                <a href="login.html" class="btn btn-outline">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+                <a href="register.html" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Sign Up
+                </a>
+            </div>
+        </nav>
+
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="floating-elements">
+            <i class="fas fa-bolt floating-element"></i>
+            <i class="fas fa-exclamation-triangle floating-element"></i>
+            <i class="fas fa-map-marker-alt floating-element"></i>
+        </div>
+        
+        <div class="container">
+            <div class="hero-content fade-in">
+                <h2 class="hero-title">
+                    Emergency Power Outage Control Hub
+                </h2>
+                <p class="hero-subtitle">
+                    EPOCH: A unified platform for real-time crowdsourced LT line break reporting and AI-powered detection system to enhance electrical safety across Kerala.
+                </p>
+                
+                <div class="cta-buttons">
+                    <a href="Load_balancer.html" class="btn btn-large btn-white">
+                        <i class="fas fa-bolt"></i>
+                        Line Break Analysis
+                    </a>
+                    <a href="dashboard.html" class="btn btn-large btn-primary">
+                        <i class="fas fa-chart-area"></i>
+                        View Dashboard
+                    </a>
+                </div>
+
+                <div class="hero-stats fade-in stagger-1">
+                    <div class="hero-stat">
+                        <div class="hero-stat-number">14</div>
+                        <div class="hero-stat-label">Districts Covered</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-number">35M+</div>
+                        <div class="hero-stat-label">People Served</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-number">24/7</div>
+                        <div class="hero-stat-label">Monitoring</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h3 class="section-title">Key Features</h3>
+                <p class="section-subtitle">
+                    Comprehensive tools and technologies designed to enhance electrical safety through community participation and AI-powered detection.
+                </p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card fade-in stagger-1">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h4 class="feature-title">Crowdsourced Reporting</h4>
+                    <p class="feature-description">
+                        Submit geotagged reports with photos and videos of LT line breaks directly from your mobile device with GPS precision and offline capabilities.
+                    </p>
+                </div>
+                
+                <div class="feature-card fade-in stagger-2">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h4 class="feature-title">AI Detection System</h4>
+                    <p class="feature-description">
+                        AI-powered authenticity analysis of reports to understand ground realities and identify genuine electrical hazards with high accuracy.
+                    </p>
+                </div>
+                
+                <div class="feature-card fade-in stagger-3">
+                    <div class="feature-icon">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <h4 class="feature-title">Real-time Dashboard</h4>
+                    <p class="feature-description">
+                        Interactive map visualization with dynamic hotspots, live data streams, and comprehensive analytics for KSEBL operators and field teams.
+                    </p>
+                </div>
+                
+                <div class="feature-card fade-in stagger-4">
+                    <div class="feature-icon">
+                        <i class="fas fa-language"></i>
+                    </div>
+                    <h4 class="feature-title">Vernacular Reporting</h4>
+                    <p class="feature-description">
+                        Vernacular reporting enables community members to submit line break information in Malayalam or English via voice or text, ensuring inclusive participation.
+                    </p>
+                </div>
+
+                <div class="feature-card fade-in stagger-5">
+                    <div class="feature-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h4 class="feature-title">Instant Alerts</h4>
+                    <p class="feature-description">
+                        Real-time alerts to KSEBL control room and field operations teams with exact location coordinates and severity assessment for immediate response.
+                    </p>
+                </div>
+
+                <div class="feature-card fade-in stagger-6">
+                    <div class="feature-icon">
+                        <i class="fas fa-cloud-download-alt"></i>
+                    </div>
+                    <h4 class="feature-title">Offline Reporting & Sync</h4>
+                    <p class="feature-description">
+                        Allows citizens to submit reports without internet; data is stored locally and synced automatically when connectivity is restored during power outages.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-card fade-in stagger-1">
+                    <div class="stat-number">14</div>
+                    <div class="stat-label">Districts</div>
+                    <div class="stat-description">Complete Kerala Coverage</div>
+                </div>
+                
+                <div class="stat-card fade-in stagger-2">
+                    <div class="stat-number">35M+</div>
+                    <div class="stat-label">Citizens</div>
+                    <div class="stat-description">Protected Population</div>
+                </div>
+                
+                <div class="stat-card fade-in stagger-3">
+                    <div class="stat-number">1000+</div>
+                    <div class="stat-label">Substations</div>
+                    <div class="stat-description">Monitored Network</div>
+                </div>
+                
+                <div class="stat-card fade-in stagger-4">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Operations</div>
+                    <div class="stat-description">Continuous Monitoring</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h3 class="section-title">About EPOCH</h3>
+                <p class="section-subtitle">
+                    Emergency Power Outage Control Hub - Revolutionizing electrical safety through community-driven intelligence and AI-powered detection technology.
+                    Kerala's extensive electrical grid serves over 35 million citizens across 14 districts, facing challenges from LT line breaks, transformer failures, and electrical hazards during monsoons and extreme weather.
+                </p>
+            </div>
+            
+            <div class="about-content">
+                <div class="about-text fade-in stagger-1">
+                    <div class="about-card">
+                        <div class="about-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <h4>Our Mission</h4>
+                        <p>
+                            EPOCH empowers Kerala's communities to actively participate in electrical safety through crowdsourced reporting and real-time AI detection. We bridge the gap between citizen observations and KSEBL response systems to create a comprehensive hazard monitoring network.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="about-text fade-in stagger-2">
+                    <div class="about-card">
+                        <div class="about-icon">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <h4>Our Vision</h4>
+                        <p>
+                            To establish Kerala as a leader in community-driven electrical hazard management, where every citizen becomes a guardian of power grid safety through technology-enabled reporting and collaborative intelligence systems.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="about-text fade-in stagger-3">
+                    <div class="about-card">
+                        <div class="about-icon">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <h4>How It Works</h4>
+                        <p>
+                            EPOCH combines geotagged citizen reports with AI-powered authenticity analysis to create real-time hazard maps. Our platform processes multilingual content, validates reports through AI verification, and provides predictive analytics to forecast potential danger zones.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <div class="container">
+            <div class="contact-content fade-in">
+                <h3>Get in Touch</h3>
+                <p>
+                    For technical support, partnerships, or inquiries about EPOCH platform, please contact Kerala State Electricity Board Limited.
+                </p>
+                
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div>
+                            <strong>Email</strong><br>
+                            control@kseb.in
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div>
+                            <strong>Emergency</strong><br>
+                            1912 (KSEBL Helpline)
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div>
+                            <strong>Location</strong><br>
+                            Thiruvananthapuram, Kerala
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h4>EPOCH</h4>
+                    <p>
+                        A cutting-edge platform by KSEBL for LT line break monitoring and community-driven electrical safety across Kerala's power distribution network.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h5>Platform</h5>
+                    <ul class="footer-links">
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="Load_balancer.html">Line Break Load Data</a></li>
+                        <li><a href="#">Mobile App</a></li>
+                        <li><a href="#">API Access</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h5>Resources</h5>
+                    <ul class="footer-links">
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">Safety Guidelines</a></li>
+                        <li><a href="#">Training Materials</a></li>
+                        <li><a href="#">Technical Papers</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h5>Support</h5>
+                    <ul class="footer-links">
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Contact Support</a></li>
+                        <li><a href="#">System Status</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Kerala State Electricity Board Limited (KSEBL). All rights reserved. | Problem Statement ID: 25079</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- External Scripts -->
+    <script src="js/main.js"></script>
+    
+    <script>
+        // Backend API Configuration
+        const BACKEND_URL = 'http://localhost:5000';
+        const API_BASE_URL = 'http://127.0.0.1:8001';
+
+        // Check backend connectivity
+        async function checkBackendStatus() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/health`);
+                if (response.ok) {
+                    console.log('EPOCH Detection System: Online');
+                    return true;
+                }
+            } catch (err) {
+                console.warn('EPOCH Detection System: Offline');
+                return false;
+            }
+        }
+
+        // Header scroll effect
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Mobile menu functionality
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            const nav = document.getElementById('nav');
+            const overlay = document.getElementById('mobileOverlay');
+            const icon = this.querySelector('i');
+            
+            nav.classList.toggle('open');
+            overlay.classList.toggle('active');
+            
+            if (nav.classList.contains('open')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+
+        // Close mobile menu when clicking overlay
+        document.getElementById('mobileOverlay').addEventListener('click', function() {
+            const nav = document.getElementById('nav');
+            const icon = document.querySelector('.mobile-menu-btn i');
+            
+            nav.classList.remove('open');
+            this.classList.remove('active');
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    // Close mobile menu if open
+                    const nav = document.getElementById('nav');
+                    const overlay = document.getElementById('mobileOverlay');
+                    const icon = document.querySelector('.mobile-menu-btn i');
+                    
+                    nav.classList.remove('open');
+                    overlay.classList.remove('active');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                    
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Active navigation link highlighting
+        window.addEventListener('scroll', function() {
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (scrollY >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all fade-in elements
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('EPOCH Landing Page Loaded');
+            console.log('Problem Statement ID: 25079 - LT Line Break Detection & Control');
+            
+            // Check backend connectivity
+            const backendOnline = await checkBackendStatus();
+            
+            if (backendOnline) {
+                console.log('AI Detection System: Connected');
+            } else {
+                console.log('AI Detection System: Running in fallback mode');
+            }
+            
+            // Add loading animation to CTA buttons
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    if (this.href && !this.href.includes('#') && !this.href.includes('dashboard.html') && !this.href.includes('Load_balancer.html')) {
+                        const originalText = this.innerHTML;
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+                        
+                        setTimeout(() => {
+                            this.innerHTML = originalText;
+                        }, 2000);
+                    }
+                });
+            });
+
+            // Initialize stats counter animation
+            const statsObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const statNumbers = entry.target.querySelectorAll('.stat-number, .hero-stat-number');
+                        statNumbers.forEach(stat => {
+                            const finalValue = stat.textContent;
+                            if (!isNaN(parseInt(finalValue))) {
+                                animateValue(stat, 0, parseInt(finalValue), 1500);
+                            }
+                        });
+                        statsObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            document.querySelectorAll('.stats, .hero-stats').forEach(section => {
+                statsObserver.observe(section);
+            });
+        });
+
+        // Animate counter values
+        function animateValue(element, start, end, duration) {
+            const range = end - start;
+            const increment = range / (duration / 16);
+            let current = start;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+                    element.textContent = element.textContent.replace(/\d+/, end);
+                    clearInterval(timer);
+                } else {
+                    element.textContent = element.textContent.replace(/\d+/, Math.floor(current));
+                }
+            }, 16);
+        }
+
+        // Handle online/offline status
+        window.addEventListener('online', function() {
+            console.log('EPOCH System: Online');
+            checkBackendStatus();
+        });
+
+        window.addEventListener('offline', function() {
+            console.log('EPOCH System: Offline mode activated');
+        });
+    </script>
+</body>
+</html>
